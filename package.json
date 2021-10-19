@@ -1,0 +1,17 @@
+{
+  "name": "maths-pj1",
+  "version": "1.0.0",
+  "description": "Faire apprendre un réseau neuronal de jouer au flappy bird / Projet de Modélisation Mathématique (Semestre 3 Période A)",
+  "author": "LoganTann",
+  "license": "MIT",
+  
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "parcel": "^2.0.0"
+  }
+}
