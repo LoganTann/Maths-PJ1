@@ -1,9 +1,11 @@
+import Game from "./game";
+
 export default {
-    bird: null,
-    bg: null,
-    fg: null,
-    pipe: null,
-    pipeRev: null,
+    bird: HTMLImageElement = null,
+    bg: HTMLImageElement = null,
+    fg: HTMLImageElement = null,
+    pipe: HTMLImageElement = null,
+    pipeRev: HTMLImageElement = null,
 
     defs: {
         bird: require("../../assets/yellowbird-upflap.png"),
@@ -14,7 +16,7 @@ export default {
     },
 
     load() {
-        console.log(this.defs);
+        const log = Game.log("Loading assets...");
         const imagePromises = [];
 
         for (let asset in this.defs) {
@@ -22,10 +24,19 @@ export default {
             const field = this[asset];
             field.src = this.defs[asset];
             imagePromises.push(new Promise(function(resolve, reject) {
-                field.onload = resolve
-                field.onerror = reject
+                log.innerHTML += " (Creating " + field.src + ") ";
+                field.onload = function() {
+                    log.innerHTML += " (Solved " + field.src + ") ";
+                    resolve('')
+                };
+                field.onerror = function(e) {
+                    log.innerHTML += " (Failed " + field.src + " : " + e + ") ";
+                    reject('')
+                };
             }));
         }
+        
+        Game.log("Promises created");
         return Promise.all(imagePromises);
     }
 }
