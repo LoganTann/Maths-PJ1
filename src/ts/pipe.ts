@@ -1,31 +1,32 @@
 import assets from "./assets";
+import Game from "./game";
 import { Coord, gameLifecycle, randint } from "./utils";
 
 export default class Pipe implements gameLifecycle{
-    static gap: number = 100;
-    static speed: number = -130;
-    public static createNewPipe: CallableFunction;
-    public static removeLastPipe: CallableFunction;
-    
-    public static lastCreatedPosY: number;
+    private static gap: Coord = {x: 180, y: 100};
+    private static speed: number = -130;
+    public static gameClass: Game;
 
-    defs: {[key: string]: any} = {};
-
+    public defs: {[key: string]: any} = {};
+    private id: number;
     private position: Coord;  /// position x, y = left, center
-    private createdPipe = false;
 
-    constructor(canvas: HTMLCanvasElement) {
-        Pipe.lastCreatedPosY = canvas.height/2;
+    constructor(canvas: HTMLCanvasElement, id: number) {
+        this.id = id;
+        this.defs.canvasWidth = canvas.width;
         this.load(canvas);
     }
     load(canvas: HTMLCanvasElement) {
-        this.defs.canvasWidth = canvas.width;
-        let y = randint(6, 30) * 10;
-        y = Math.min(y, Pipe.lastCreatedPosY + 250);
-        y = Math.max(y, Pipe.lastCreatedPosY - 250);
-        Pipe.lastCreatedPosY = y;
-        this.position = {x: this.defs.canvasWidth, y: y};
+        this.restore(this.defs.canvasWidth + Pipe.gap.x * (this.id + 1));
     }
+
+    private restore(x = 0) {
+        this.position = {
+            x: x,
+            y: randint(4, 15) * 20
+        }
+    }
+
 
     centerY: number;
     centerX(): number {
@@ -34,20 +35,32 @@ export default class Pipe implements gameLifecycle{
 
     update(dt) {
         this.position.x += Pipe.speed * dt;
-        if (!this.createdPipe && this.position.x < (this.defs.canvasWidth - 180)) {
-            this.createdPipe = true;
-            Pipe.createNewPipe();
-        }
         if (this.position.x < -60) {
-            Pipe.removeLastPipe();
+            this.restore(Pipe.gameClass.pipes[(this.id + 2) % 3].position.x + Pipe.gap.x);
+        }
+        if (this.birdCollide()) {
+            Pipe.gameClass.player.die();
         }
     }
-
+    birdCollide(){
+        //x1, x2           = Left
+        //x1 + w1, x2 + w2 = Right
+        //y1, y2           = Bottom
+        //y1 - h1, y2 - h2 = Top
+        const birdPos: Coord = Pipe.gameClass.player.pos;
+        const birdSize: Coord = {x: assets.bird.width, y: assets.bird.height};
+        const help = 3;
+        return  (birdPos.x < this.position.x + assets.pipe.width) &&
+                (birdPos.x + birdSize.x > this.position.x) && (
+                    (birdPos.y + birdSize.y > this.position.y + Pipe.gap.y + help) ||
+                    (birdPos.y < this.position.y - Pipe.gap.y/2 - help)
+                );
+    }
     draw(scr) {
         // celle du haut
-        scr.drawImage(assets.pipeRev, this.position.x, this.position.y - Pipe.gap/2 - assets.pipe.height);
+        scr.drawImage(assets.pipeRev, this.position.x, this.position.y - Pipe.gap.y/2 - assets.pipe.height);
         // celle du bas
-        scr.drawImage(assets.pipe, this.position.x, this.position.y + Pipe.gap/2);
+        scr.drawImage(assets.pipe, this.position.x, this.position.y + Pipe.gap.y/2);
         // objectif
         scr.fillRect(this.centerX()-5,this.position.y-5,10,10); // fill in the pixel at (10,10)
     }

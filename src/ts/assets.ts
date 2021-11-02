@@ -1,9 +1,12 @@
+'use strict';
+import Game from "./game";
+
 export default {
-    bird: null,
-    bg: null,
-    fg: null,
-    pipe: null,
-    pipeRev: null,
+    bird: HTMLImageElement = null,
+    bg: HTMLImageElement = null,
+    fg: HTMLImageElement = null,
+    pipe: HTMLImageElement = null,
+    pipeRev: HTMLImageElement = null,
 
     defs: {
         bird: require("../../assets/yellowbird-upflap.png"),
@@ -14,18 +17,19 @@ export default {
     },
 
     load() {
-        console.log(this.defs);
         const imagePromises = [];
 
-        for (let asset in this.defs) {
+        const defs = this.defs;
+        for (let asset in defs) {
             this[asset] = new Image();
             const field = this[asset];
-            field.src = this.defs[asset];
             imagePromises.push(new Promise(function(resolve, reject) {
-                field.onload = resolve
-                field.onerror = reject
+                field.onload = resolve;
+                field.onerror = reject;
+                field.src = defs[asset];
             }));
         }
+        
         return Promise.all(imagePromises);
     }
 }

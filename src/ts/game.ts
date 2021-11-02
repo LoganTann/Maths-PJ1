@@ -9,24 +9,31 @@ export default class Game implements gameLifecycle {
         score: 0,
     }
     
-    private player: Bird;
-    private pipes: Array<Pipe> = new Array();
+    player: Bird;
+    pipes: Array<Pipe> = new Array();
 
     async load(canvas ?: HTMLCanvasElement) {
+        const logElem = Game.log("Loading game (Assets...");
         await assets.load();
+        logElem.innerHTML += "OK,";
         this.player = new Bird(canvas);
+        logElem.innerHTML += "Bird OK,";
 
-        const pipes = this.pipes;
-        Pipe.createNewPipe = () => pipes.push(new Pipe(canvas));
-        Pipe.removeLastPipe = () => pipes.shift();
-        Pipe.createNewPipe();
+        Pipe.gameClass = this;
+
+        for (let i = 0; i < 3; i++) {
+            this.pipes.push(new Pipe(canvas, i));
+        }
+        
+        logElem.innerHTML += "Pipes OK)";
+        logElem.innerHTML += " ->> Game loaded";
     }
 
     update(dt: DOMHighResTimeStamp) {
+        this.player.update(dt);
         for (let pipe of this.pipes) {
             pipe.update(dt);
         }
-        this.player.update(dt);
     }
 
     draw(scr: CanvasRenderingContext2D){  
@@ -44,7 +51,16 @@ export default class Game implements gameLifecycle {
     }
     
     keyPress(event: KeyboardEvent) {
-        console.log("ee");
         this.player.moveUp();
-    }  
+    }
+
+    
+    static log($text) {
+        const logContainer = document.getElementById("log");
+        const elem = document.createElement("div");
+        elem.innerText = $text;
+        elem.dataset.hour = new Date().toLocaleTimeString();
+        logContainer.prepend(elem);
+        return elem;
+    }
 }
