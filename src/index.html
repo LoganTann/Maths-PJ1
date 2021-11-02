@@ -29,6 +29,14 @@
       }
       #side {
         margin: 1em;
+      }  
+      #log div::before {
+        content: attr(data-hour);
+        padding: 1em;
+      }
+      #log {
+        height: 200px;
+        overflow: auto;
       }
     </style>
   </body>

@@ -13,17 +13,17 @@ export default class Game implements gameLifecycle {
     pipes: Array<Pipe> = new Array();
 
     async load(canvas ?: HTMLCanvasElement) {
-        const logElem = Game.log("Loading game (");
+        const logElem = Game.log("Loading game (Assets...");
         await assets.load();
-        logElem.innerHTML += "Assets OK,";
+        logElem.innerHTML += "OK,";
         this.player = new Bird(canvas);
         logElem.innerHTML += "Bird OK,";
 
-        const pipes = this.pipes;
-        Pipe.parent = this;
-        Pipe.createNewPipe = () => pipes.push(new Pipe(canvas));
-        Pipe.removeLastPipe = () => pipes.shift();
-        Pipe.createNewPipe();
+        Pipe.gameClass = this;
+
+        for (let i = 0; i < 3; i++) {
+            this.pipes.push(new Pipe(canvas, i));
+        }
         
         logElem.innerHTML += "Pipes OK)";
         logElem.innerHTML += " ->> Game loaded";

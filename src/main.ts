@@ -1,3 +1,4 @@
+'use strict';
 import Game from './ts/game';
 
 
@@ -8,19 +9,27 @@ document.addEventListener('DOMContentLoaded', () => {
     actionBtn.addEventListener('click', () => {
         if (started) {
             started = false;
+            actionBtn.innerText = 'Start';
             return;
         } else {
             actionBtn.innerText = 'Kill';
+            document.getElementById("log").innerHTML = '';
             started = true;
         }
 
+        actionBtn.blur();
         const canvas = <HTMLCanvasElement> document.getElementById("canvas");  
         const ctx: CanvasRenderingContext2D = canvas.getContext("2d"); 
         const game = new Game();
 
         let lastElapsedTime: DOMHighResTimeStamp = 0;
         function gameloop(elapsedTime: DOMHighResTimeStamp) {
-            const dt = (elapsedTime - lastElapsedTime) * 0.001;
+            let dt = (elapsedTime - lastElapsedTime) * 0.001;
+            if (dt > 1) {
+                // might be due to the game being restarted...
+                dt = 0.016;
+                Game.log("Warning: dt > 1");
+            }
             lastElapsedTime = elapsedTime;
             game.update(dt);
             game.draw(ctx);
@@ -36,5 +45,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-document.addEventListener("click", function() {
-});
