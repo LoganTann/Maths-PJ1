@@ -10,6 +10,7 @@ export default class Pipe implements gameLifecycle{
     public defs: {[key: string]: any} = {};
     private id: number;
     private position: Coord;  /// position x, y = left, center
+    public static closest: number = 0;
 
     constructor(canvas: HTMLCanvasElement, id: number) {
         this.id = id;
@@ -17,7 +18,7 @@ export default class Pipe implements gameLifecycle{
         this.load(canvas);
     }
     load(canvas: HTMLCanvasElement) {
-        this.restore(this.defs.canvasWidth + Pipe.gap.x * (this.id + 1));
+        this.restore(this.defs.canvasWidth + Pipe.gap.x * (this.id + 0));
     }
 
     private restore(x = 0) {
@@ -27,34 +28,43 @@ export default class Pipe implements gameLifecycle{
         }
     }
 
-
-    centerY: number;
-    centerX(): number {
-        return this.position.x + assets.pipe.width;
+    getCenterPos(): Coord {
+        return {
+            x: this.position.x + assets.pipe.width,
+            y: this.position.y
+        }
     }
 
     update(dt) {
         this.position.x += Pipe.speed * dt;
+        if (Pipe.closest == this.id && this.position.x < 70 - assets.bird.width) {
+            Pipe.closest = (this.id + 1) % 3;
+        }
         if (this.position.x < -60) {
             this.restore(Pipe.gameClass.pipes[(this.id + 2) % 3].position.x + Pipe.gap.x);
         }
-        if (this.birdCollide()) {
-            Pipe.gameClass.player.die();
-        }
     }
-    birdCollide(){
+    birdCollide(birdPos: Coord){
         //x1, x2           = Left
         //x1 + w1, x2 + w2 = Right
         //y1, y2           = Bottom
         //y1 - h1, y2 - h2 = Top
-        const birdPos: Coord = Pipe.gameClass.player.pos;
+        //const birdPos: Coord = Pipe.gameClass.player.pos;
         const birdSize: Coord = {x: assets.bird.width, y: assets.bird.height};
-        const help = 3;
+        const help = 1;
         return  (birdPos.x < this.position.x + assets.pipe.width) &&
                 (birdPos.x + birdSize.x > this.position.x) && (
                     (birdPos.y + birdSize.y > this.position.y + Pipe.gap.y + help) ||
                     (birdPos.y < this.position.y - Pipe.gap.y/2 - help)
                 );
+    }
+
+    static getClosestPipe(offset: number = 0): Pipe {
+        let id = (Pipe.closest + offset) % 3;
+        if (id < 0) {
+            id += 3;
+        }
+        return Pipe.gameClass.pipes[id];
     }
     draw(scr) {
         // celle du haut
@@ -62,7 +72,11 @@ export default class Pipe implements gameLifecycle{
         // celle du bas
         scr.drawImage(assets.pipe, this.position.x, this.position.y + Pipe.gap.y/2);
         // objectif
-        scr.fillRect(this.centerX()-5,this.position.y-5,10,10); // fill in the pixel at (10,10)
+
+        const centerPos: Coord = this.getCenterPos();
+        scr.fillRect(centerPos.x - 5, centerPos.y-5,10,10); // fill in the pixel at (10,10)
+
+        scr.fillText(this.id, centerPos.x, centerPos.y + 20);
     }
 
 }

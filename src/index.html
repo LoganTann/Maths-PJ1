@@ -13,6 +13,7 @@
       </div>
       <div id="side">
         <button id="btn">Start</button>
+        <button id="btnStop">Stop</button>
         <p>Log :</p>
         <div id="log"></div>
       </div>
@@ -29,6 +30,8 @@
       }
       #side {
         margin: 1em;
+        flex-grow: 1;
+        max-width: 60em;
       }  
       #log div::before {
         content: attr(data-hour);

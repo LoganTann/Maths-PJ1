@@ -4,7 +4,6 @@
   "description": "Faire apprendre un réseau neuronal de jouer au flappy bird / Projet de Modélisation Mathématique (Semestre 3 Période A)",
   "author": "LoganTann",
   "license": "MIT",
-  
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "source": "src/index.html",
   "scripts": {
@@ -13,5 +12,8 @@
   },
   "devDependencies": {
     "parcel": "^2.0.0"
+  },
+  "dependencies": {
+    "synaptic": "^1.1.4"
   }
 }
