@@ -45,19 +45,18 @@ export default class Pipe implements gameLifecycle{
             this.restore(Pipe.gameClass.pipes[(this.id + 2) % 3].position.x + Pipe.gap.x);
         }
     }
+
     birdCollide(birdPos: Coord){
         //x1, x2           = Left
         //x1 + w1, x2 + w2 = Right
         //y1, y2           = Bottom
         //y1 - h1, y2 - h2 = Top
-        //const birdPos: Coord = Pipe.gameClass.player.pos;
-        const birdSize: Coord = {x: assets.bird.width, y: assets.bird.height};
-        const help = 0;
-        return  (birdPos.x < this.position.x + assets.pipe.width) &&
-                (birdPos.x + birdSize.x > this.position.x) && (
-                    (birdPos.y + birdSize.y > this.position.y + Pipe.gap.y + help) ||
-                    (birdPos.y < this.position.y - Pipe.gap.y/2 - help)
-                );
+        return (birdPos.x + assets.bird.width >= this.position.x)
+            && (birdPos.x <= this.position.x + assets.pipe.width)
+            && (
+                (birdPos.y < this.position.y - Pipe.gap.y / 2) ||
+                (birdPos.y + assets.bird.height > this.position.y + Pipe.gap.y / 2)
+            );
     }
 
     static getClosestPipe(offset: number = 0): Pipe {
@@ -67,6 +66,7 @@ export default class Pipe implements gameLifecycle{
         }
         return Pipe.gameClass.pipes[id];
     }
+    
     draw(scr) {
         // celle du haut
         scr.drawImage(assets.pipeRev, this.position.x, this.position.y - Pipe.gap.y/2 - assets.pipe.height);

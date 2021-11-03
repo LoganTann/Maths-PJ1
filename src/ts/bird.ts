@@ -43,8 +43,7 @@ export default class Bird implements gameLifecycle{
 
     update(dt: number) {
         this.velocity_y += Math.min(this.acceleration_y * dt, this.maxvelocity_y);
-        this.pos.y = Math.min(this.pos.y + this.velocity_y * dt,390);
-
+        this.pos.y = Math.min(this.pos.y + this.velocity_y * dt, 390);
         
         if (this.died) return;
 
@@ -79,22 +78,10 @@ export default class Bird implements gameLifecycle{
             scr.globalAlpha = 1;
             return;
         }
-        
         scr.drawImage(assets.bird, this.pos.x, this.pos.y);
     }
     moveUp() {
         if (this.died) return; 
         this.velocity_y = -300;
     }
-
-
-
-    static normalize(value, max){
-		// clamp the value between its min/max limits
-		if (value < -max) value = -max;
-		else if (value > max) value = max;
-		
-		// normalize the clamped value
-		return (value/max);
-	}
 }

@@ -82,14 +82,13 @@ export default class Game implements gameLifecycle {
         scr.drawImage(assets.fg, this.gameElemsPosX.fg, scr.canvas.height - assets.fg.height);
         scr.drawImage(assets.fg, this.gameElemsPosX.fg + assets.fg.width, scr.canvas.height - assets.fg.height);
 
-        for (let player of this.players) {
-            player.draw(scr);
-        }
         scr.font = '14px sans-serif';
         scr.fillStyle = '#000';
+        for (let i in this.players) {
+            this.players[i].draw(scr);
+        }
         scr.fillText(`Generation: ${Game.generation}`, 10, 450);
         scr.fillText(`Score: ${Game.score}`, 10, 464);
-        scr.fillText(`next pipe: ${Pipe.getClosestPipe().id} (last: ${Pipe.getClosestPipe(-1).id})`, 10, 478);
     }
     
     keyPress(event: KeyboardEvent) {
