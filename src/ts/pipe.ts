@@ -8,7 +8,7 @@ export default class Pipe implements gameLifecycle{
     public static gameClass: Game;
 
     public defs: {[key: string]: any} = {};
-    private id: number;
+    public readonly id: number;
     private position: Coord;  /// position x, y = left, center
     public static closest: number = 0;
 
@@ -39,6 +39,7 @@ export default class Pipe implements gameLifecycle{
         this.position.x += Pipe.speed * dt;
         if (Pipe.closest == this.id && this.position.x < 70 - assets.bird.width) {
             Pipe.closest = (this.id + 1) % 3;
+            Game.score += 1;
         }
         if (this.position.x < -60) {
             this.restore(Pipe.gameClass.pipes[(this.id + 2) % 3].position.x + Pipe.gap.x);
@@ -51,7 +52,7 @@ export default class Pipe implements gameLifecycle{
         //y1 - h1, y2 - h2 = Top
         //const birdPos: Coord = Pipe.gameClass.player.pos;
         const birdSize: Coord = {x: assets.bird.width, y: assets.bird.height};
-        const help = 1;
+        const help = 0;
         return  (birdPos.x < this.position.x + assets.pipe.width) &&
                 (birdPos.x + birdSize.x > this.position.x) && (
                     (birdPos.y + birdSize.y > this.position.y + Pipe.gap.y + help) ||
@@ -74,7 +75,7 @@ export default class Pipe implements gameLifecycle{
         // objectif
 
         const centerPos: Coord = this.getCenterPos();
-        scr.fillRect(centerPos.x - 5, centerPos.y-5,10,10); // fill in the pixel at (10,10)
+        scr.fillRect(centerPos.x - 5, centerPos.y-5,10,10);
 
         scr.fillText(this.id, centerPos.x, centerPos.y + 20);
     }

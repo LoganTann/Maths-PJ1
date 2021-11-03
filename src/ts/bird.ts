@@ -49,30 +49,28 @@ export default class Bird implements gameLifecycle{
         if (this.died) return;
 
         const nextPipe: Pipe = Pipe.getClosestPipe();
-        const nextPipePos: Coord = nextPipe.getCenterPos();
         if (nextPipe.birdCollide(this.pos) || Pipe.getClosestPipe(-1).birdCollide(this.pos)) {
             this.die();
         }
+        const nextPipePos: Coord = nextPipe.getCenterPos();
         this.distanceToNextPipe = {
             x: nextPipePos.x - this.pos.x - assets.bird.width * 0.5,
             y: nextPipePos.y - this.pos.y - assets.bird.height * 0.5
         };
-        /*
+        
 		// input 1: the horizontal distance between the bird and the target
-		var targetDeltaX = this.normalize(target.x, 700) * this.SCALE_FACTOR;
-
+        //var targetDeltaX = Bird.normalize(this.distanceToNextPipe.x, 700) * this.SCALE_FACTOR;
 		// input 2: the height difference between the bird and the target
-		var targetDeltaY = this.normalize(bird.y - target.y, 800) * this.SCALE_FACTOR;
+        //var targetDeltaY = Bird.normalize(this.distanceToNextPipe.y, 800) * this.SCALE_FACTOR;
 
 		// create an array of all inputs
-		var inputs = [targetDeltaX, targetDeltaY];
+		var inputs = [this.distanceToNextPipe.x, this.distanceToNextPipe.y];
 
 		// calculate outputs by activating synaptic neural network of this bird
-		var outputs = this.Population[bird.index].activate(inputs);
+		var outputs = this.perceptron.activate(inputs);
 
 		// perform flap if output is greater than 0.5
-		if (outputs[0] > 0.5) bird.flap();
-        */
+		if (outputs[0] > 0.5) this.moveUp();
     }
     draw(scr: CanvasRenderingContext2D) {
         if (this.died) {
@@ -83,10 +81,6 @@ export default class Bird implements gameLifecycle{
         }
         
         scr.drawImage(assets.bird, this.pos.x, this.pos.y);
-        scr.font = '10px';
-        scr.fillStyle = '#FF222266';
-        scr.fillRect(this.pos.x + assets.bird.width * 0.5, this.pos.y + assets.bird.height * 0.5, this.distanceToNextPipe.x, this.distanceToNextPipe.y);
-        scr.fillStyle = '#000';
     }
     moveUp() {
         if (this.died) return; 
