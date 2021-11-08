@@ -1,5 +1,6 @@
 'use strict';
 import Game from './ts/game';
+const synaptic = require('synaptic');
 
 
 // dom content loaded
@@ -54,6 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
         started = false;
         startBtn.disabled = false;
         stopBtn.disabled = true;
+    });
+
+    const savebtn = document.getElementById('save');
+    const loadbtn = document.getElementById('load');
+    const textarea = <HTMLTextAreaElement> document.getElementById('text');
+    savebtn.addEventListener('click', ()=>{
+        textarea.value = JSON.stringify(Game.brainSaves[0].brain.perceptron.toJSON(), undefined, 1);
+    });
+    loadbtn.addEventListener('click', () => {
+        Game.brainSaves[0].brain.perceptron = synaptic.Network.fromJSON(JSON.parse(textarea.value));
+        // clear the aray exept the first one
+        Game.brainSaves.splice(1, Game.brainSaves.length - 1);
+        game.reset();
     });
 });
 

@@ -64,7 +64,6 @@ export default class Game implements gameLifecycle {
             Game.relativeGeneration = 0;
             return;
         }
-
         Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[0] });
         if (Game.generation < 3) {
             Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[1] });
