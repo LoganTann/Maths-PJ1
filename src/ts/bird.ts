@@ -1,5 +1,5 @@
 import assets from "./assets";
-import { Coord, gameLifecycle } from "./utils";
+import { Coord, gameLifecycle, mutateGene } from "./utils";
 import Game from "./game";
 import Pipe from "./pipe";
 const synaptic = require('synaptic');
@@ -17,6 +17,8 @@ export default class Bird implements gameLifecycle{
     public static gameClass: Game;
     public perceptron;
     distanceToNextPipe: Coord;
+    public timeAlive: number;
+    public type: string = "A";
 
     die() {
         this.died = true;
@@ -26,15 +28,23 @@ export default class Bird implements gameLifecycle{
     }
     load(canvas?: HTMLCanvasElement) { 
         this.pos = {x: 70, y: canvas.height/2 || 500};
+        this.perceptron = new synaptic.Architect.Perceptron(2, 4, 1);
+        this.timeAlive = 0;
+    }
 
-
-        this.perceptron = new synaptic.Architect.Perceptron(2, 6, 1);
-
-        // set additional parameters for the new unit// optionnal
-        this.perceptron.index = 0;
-        this.perceptron.fitness = 0;
-        this.perceptron.score = 0;
-        this.perceptron.isWinner = false;
+    copyBrain(taget: Bird) {
+        this.perceptron = taget.perceptron.clone();
+    }
+    mutateBrain(mutationRate: number) {
+        // mutate some 'bias' information of the offspring neurons
+        for (const layer of this.perceptron.layers.hidden) {
+            for (const neurons of layer.list) {
+                neurons['bias'] = mutateGene(neurons['bias'], mutationRate);
+            }
+        }
+    }
+    crossover(male: Bird, female: Bird) {
+        // todo
     }
 
     static getLastPipe() {
@@ -46,6 +56,8 @@ export default class Bird implements gameLifecycle{
         this.pos.y = Math.min(this.pos.y + this.velocity_y * dt, 390);
         
         if (this.died) return;
+
+        this.timeAlive += dt;
 
         const nextPipe: Pipe = Pipe.getClosestPipe();
         if (nextPipe.birdCollide(this.pos) || Pipe.getClosestPipe(-1).birdCollide(this.pos)) {
@@ -73,12 +85,13 @@ export default class Bird implements gameLifecycle{
     }
     draw(scr: CanvasRenderingContext2D) {
         if (this.died) {
-            scr.globalAlpha = 0.4;
-            scr.drawImage(assets.bird, this.pos.x, this.pos.y);
-            scr.globalAlpha = 1;
+            scr.drawImage(assets.dead, this.pos.x, this.pos.y);
             return;
         }
         scr.drawImage(assets.bird, this.pos.x, this.pos.y);
+        // print text
+        //scr.font = "10px Arial";
+        scr.fillText(this.type, this.pos.x, this.pos.y);
     }
     moveUp() {
         if (this.died) return; 

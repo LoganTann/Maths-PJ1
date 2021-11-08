@@ -7,13 +7,15 @@ export default {
     fg: HTMLImageElement = null,
     pipe: HTMLImageElement = null,
     pipeRev: HTMLImageElement = null,
+    dead: HTMLImageElement = null,
 
     defs: {
         bird: require("../../assets/yellowbird-upflap.png"),
         bg: require("../../assets/background-day.png"),
         fg: require("../../assets/base.png"),
         pipe: require("../../assets/pipe-green.png"),
-        pipeRev: require("../../assets/pipe-green-rev.png")
+        pipeRev: require("../../assets/pipe-green-rev.png"),
+        dead: require("../../assets/dead.png")
     },
 
     load() {

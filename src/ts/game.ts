@@ -1,6 +1,6 @@
 import Bird from "./bird";
 import Pipe from "./pipe";
-import { gameLifecycle } from "./utils";
+import { gameLifecycle, randint } from "./utils";
 import assets from "./assets";
 
 export default class Game implements gameLifecycle {
@@ -14,6 +14,8 @@ export default class Game implements gameLifecycle {
     gameElemsPosX: { bg: number, fg: number };
     static score: number;
     static generation: number = 0;
+    static relativeGeneration = 0;
+    static stillAlive: number;
 
     private canvas: HTMLCanvasElement;
 
@@ -28,8 +30,11 @@ export default class Game implements gameLifecycle {
         this.reset();
     }
 
+    static brainSaves: any = new Array();
+
     reset() {
         Game.generation++;
+        Game.relativeGeneration++;
         Pipe.closest = 0;
         Game.score = 0;
         this.gameElemsPosX = { bg: 0, fg: 0 };
@@ -37,11 +42,61 @@ export default class Game implements gameLifecycle {
         for (let i = 0; i < 3; i++) {
             this.pipes.push(new Pipe(this.canvas, i));
         }
+        if (this.players?.length > 0) {
+            return;
+        }
         this.players = new Array();
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 20; i++) {
             this.players.push(new Bird(this.canvas));
         }
-        Game.log(" ->> Game (re)loaded");
+    }
+
+    /**
+     * Triggers when the population is dead
+     */
+    beforeReset() {
+        const oldPopulation = this.players.sort((a, b) => {
+            return b.timeAlive - a.timeAlive;
+        });
+        this.players = new Array();
+        if (Game.score < 1) {
+            Game.log(`Generation ${Game.generation}: Nobody went further than 1. Let's restart with a completely random population.`);
+            Game.relativeGeneration = 0;
+            return;
+        }
+
+        Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[0] });
+        if (Game.generation < 3) {
+            Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[1] });
+            Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[2] });
+        }
+        Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[1] });
+        Game.brainSaves.sort((a, b) => {
+            if (b.score == a.score) {
+                return b.timeAlive - a.timeAlive;
+            }
+            return b.score - a.score;
+        });
+        const bestBrain = Game.brainSaves[0];
+        Game.log(`Generation ${Game.generation}: Using the brain from gen ${bestBrain.generation} with  score = ${bestBrain.score} (lived ${bestBrain.timeAlive}s)`);
+        for (let i = 0; i < 20; i++) {
+            let newPlayer = new Bird(this.canvas);
+            if (i < 3) {
+                // seulement trois prennent les caractéristiques du meilleur
+                newPlayer.copyBrain(bestBrain.brain);
+                newPlayer.type = "BB";
+            } else if (i < 6 && Game.brainSaves.lenght > 2) {
+                // les trois suivants prennent l'élite d'une autre génération.
+                newPlayer.type = "C";
+                newPlayer.copyBrain(Game.brainSaves[randint(0, Game.brainSaves.lenght - 1 )].brain);
+            }   // le reste (4) seront full aléatoires
+
+            if (i > 1) {
+                newPlayer.type = "B";
+                newPlayer.mutateBrain(0.2);
+            }
+            this.players.push(newPlayer);
+        }
     }
 
     update(dt: DOMHighResTimeStamp) {
@@ -50,14 +105,16 @@ export default class Game implements gameLifecycle {
         }
         
         let allDied = true;
+        Game.stillAlive = 0;
         for (let player of this.players) {
             player.update(dt);
             if (!player.died) {
                 allDied = false;
+                Game.stillAlive++;
             }
         }
         if (allDied) {
-            Game.log(" ->> All died, best score : " + Game.score);
+            this.beforeReset();
             this.reset();
         }
 
@@ -87,8 +144,8 @@ export default class Game implements gameLifecycle {
         for (let i in this.players) {
             this.players[i].draw(scr);
         }
-        scr.fillText(`Generation: ${Game.generation}`, 10, 450);
-        scr.fillText(`Score: ${Game.score}`, 10, 464);
+        scr.fillText(`Generation: ${Game.relativeGeneration} \t (total: ${Game.generation})`, 10, 450);
+        scr.fillText(`Birds alive: ${Game.stillAlive} \t Score: ${Game.score}`, 10, 464);
     }
     
     keyPress(event: KeyboardEvent) {

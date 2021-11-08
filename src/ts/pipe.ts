@@ -3,7 +3,7 @@ import Game from "./game";
 import { Coord, gameLifecycle, randint } from "./utils";
 
 export default class Pipe implements gameLifecycle{
-    private static gap: Coord = {x: 180, y: 100};
+    private static gap: Coord = {x: 180, y: 110};
     private static speed: number = -130;
     public static gameClass: Game;
 
