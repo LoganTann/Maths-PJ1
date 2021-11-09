@@ -59,17 +59,12 @@ export default class Game implements gameLifecycle {
             return b.timeAlive - a.timeAlive;
         });
         this.players = new Array();
-        if (Game.score < 1) {
+        if (Game.relativeGeneration < 2 && Game.score < 1) {
             Game.log(`Generation ${Game.generation}: Nobody went further than 1. Let's restart with a completely random population.`);
             Game.relativeGeneration = 0;
             return;
         }
         Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[0] });
-        if (Game.generation < 3) {
-            Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[1] });
-            Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[2] });
-        }
-        Game.brainSaves.push({ score: Game.score, timeAlive: oldPopulation[0].timeAlive, generation: Game.generation, brain: oldPopulation[1] });
         Game.brainSaves.sort((a, b) => {
             if (b.score == a.score) {
                 return b.timeAlive - a.timeAlive;
@@ -80,19 +75,10 @@ export default class Game implements gameLifecycle {
         Game.log(`Generation ${Game.generation}: Using the brain from gen ${bestBrain.generation} with  score = ${bestBrain.score} (lived ${bestBrain.timeAlive}s)`);
         for (let i = 0; i < 20; i++) {
             let newPlayer = new Bird(this.canvas);
-            if (i < 3) {
+            if (i < 10) {
                 // seulement trois prennent les caractéristiques du meilleur
-                newPlayer.copyBrain(bestBrain.brain);
-                newPlayer.type = "BB";
-            } else if (i < 6 && Game.brainSaves.lenght > 2) {
-                // les trois suivants prennent l'élite d'une autre génération.
-                newPlayer.type = "C";
-                newPlayer.copyBrain(Game.brainSaves[randint(0, Game.brainSaves.lenght - 1 )].brain);
-            }   // le reste (4) seront full aléatoires
-
-            if (i > 1) {
-                newPlayer.type = "B";
-                newPlayer.mutateBrain(0.2);
+                newPlayer.copyBrainAndMutate(bestBrain.brain,i>0);
+                newPlayer.type = i==0?"BB": "B";
             }
             this.players.push(newPlayer);
         }

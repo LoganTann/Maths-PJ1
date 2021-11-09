@@ -4,7 +4,7 @@ import Game from "./game";
 import Pipe from "./pipe";
 const synaptic = require('synaptic');
 
-export default class Bird implements gameLifecycle{
+export default class Bird implements gameLifecycle {
     defs: Object;
 
     pos: Coord;
@@ -32,17 +32,24 @@ export default class Bird implements gameLifecycle{
         this.timeAlive = 0;
     }
 
-    copyBrain(taget: Bird) {
-        this.perceptron = taget.perceptron.clone();
-    }
-    mutateBrain(mutationRate: number) {
-        // mutate some 'bias' information of the offspring neurons
-        for (const layer of this.perceptron.layers.hidden) {
-            for (const neurons of layer.list) {
-                neurons['bias'] = mutateGene(neurons['bias'], mutationRate);
+    copyBrainAndMutate(taget: Bird, shouldMutate: boolean = true) {
+        const brain = taget.perceptron.toJSON();
+        const mutationRate = 0.1;
+        
+        if (shouldMutate) {
+            for (const neuron of brain.neurons) {
+                if (typeof neuron.layer !== "number") {
+                    neuron.bias = mutateGene(neuron.bias, mutationRate);
+                }
+            }
+            for (const connection of brain.connections) {
+                connection.weight = mutateGene(connection.weight, mutationRate);
             }
         }
+        
+        this.perceptron = synaptic.Network.fromJSON(brain);
     }
+    
     crossover(male: Bird, female: Bird) {
         // todo
     }
